@@ -77,13 +77,36 @@ state_data = pd.DataFrame(data = stats, columns = new_cols)
 state_data.head()
 
 
+# In[5]:
+
+
+#Drop Sr.no bcoz we dont require it
+state_data.drop(['Sr.No'],axis=1,inplace=True)
+
+
+# In[6]:
+
+
+state_data.head()
+
+
+# In[7]:
+
+
+#FIXED_ISSUE : Unassigned Case Issue
+state_data['Confirmed']=state_data['Confirmed'].str.extract('(\d+)')
+state_data['Recovered']=state_data['Recovered'].str.extract('(\d+)')
+state_data['Deceased']=state_data['Deceased'].str.extract('(\d+)')
+state_data.fillna(0,inplace=True)
+
+
 # In[ ]:
 
 
 
 
 
-# In[5]:
+# In[8]:
 
 
 state_data['Confirmed'] = state_data['Confirmed'].map(int)
@@ -91,30 +114,36 @@ state_data['Recovered'] = state_data['Recovered'].map(int)
 state_data['Deceased'] = state_data['Deceased'].map(int)
 
 
-# In[6]:
+# In[ ]:
 
 
-#Drop Sr.no bcoz we dont require it
-state_data.drop(['Sr.No'],axis=1,inplace=True)
 
-
-# In[7]:
-
-
-state_data.sort_values(by='Confirmed',ascending=False,inplace=True)#Sort based on Confirmed number of cases
-
-
-# In[8]:
-
-
-state_data.head()
 
 
 # In[9]:
 
 
+state_data.sort_values(by='Confirmed',ascending=False,inplace=True)#Sort based on Confirmed number of cases
+
+
+# In[10]:
+
+
+# FIXED_ISSUE :In the latest government website ,there will be one row for  total column,so we will remove thiss
+state_data=state_data.iloc[1:]
+
+
+# In[11]:
+
+
+state_data.head()
+
+
+# In[12]:
+
+
 state_data['Active']=state_data['Confirmed']-(state_data['Recovered']+state_data['Deceased'])
-state_data
+state_data.head()
 
 
 # In[ ]:
@@ -123,7 +152,7 @@ state_data
 
 
 
-# In[10]:
+# In[13]:
 
 
 #Create summary of all the indian states
@@ -140,7 +169,7 @@ total_active=str(state_data['Active'].sum())
 
 
 
-# In[11]:
+# In[14]:
 
 
 #Save the above results in the list
@@ -154,7 +183,7 @@ cases_summary_labels=['Active','Deaths','Recovered']
 
 
 
-# In[12]:
+# In[15]:
 
 
 # Create list to be shown in dropdown
@@ -176,7 +205,7 @@ for state in state_list:
 
 
 
-# In[13]:
+# In[16]:
 
 
 import plotly.graph_objs as go
@@ -199,7 +228,7 @@ import dash_table
 
 
 
-# In[14]:
+# In[17]:
 
 
 #Create the Traces for Bar chart.Needed for Top 5 states Bar chart
@@ -222,13 +251,13 @@ top_traces.append(go.Bar(x=states,y=deaths,name='Death'))
 
 
 
-# In[15]:
+# In[18]:
 
 
 app = dash.Dash()
 
 
-# In[16]:
+# In[19]:
 
 
 server=app.server
@@ -240,7 +269,7 @@ server=app.server
 
 
 
-# In[17]:
+# In[20]:
 
 
 #Set the title of the app
@@ -259,10 +288,9 @@ app.title='Covid-19 India'
 
 
 
-# In[34]:
+# In[21]:
 
 
-#Set the app layout
 app.layout = html.Div(children=[
                 
                 
@@ -381,10 +409,10 @@ app.layout = html.Div(children=[
    
    
     
-],style={'margin':'16px'})#End container div   
+],style={'margin':'16px'})#End container div 
 
 
-# In[19]:
+# In[22]:
 
 
 # Method for updating the heading of the states when user selects from the dropdown
@@ -408,7 +436,7 @@ def update_headings(selected_state):
                             'margin':'4px','width':'100px','display':'inline-block','text-align':'center'})]
 
 
-# In[20]:
+# In[23]:
 
 
 #Method for updating the state Chart when user selects from the dropdown
@@ -425,7 +453,7 @@ def update_graph(value):
     cases_summary_number=[active,deaths,recovered]
    # print(cases_summary_number)
     
-    piedata=[go.Pie(labels=cases_summary_label, values=cases_summary_number,hole=0.3, pull=[0.2, 0,0])]
+    piedata=[go.Pie(labels=cases_summary_label, values=cases_summary_number,hole=.3)]
     return {
         'data': piedata,
         'layout': {'title':value+' Cases Summary'}
@@ -439,19 +467,13 @@ def update_graph(value):
 
 
 
-# In[21]:
+# In[24]:
 
 
 #Run the server
 if __name__ == '__main__':
     app.run_server()
     
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:
